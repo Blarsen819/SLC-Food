@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utah Foodie Group - Top Eats Under $30</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.88);
+            backdrop-filter: blur(12px);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200 font-sans pb-16">
+
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
+                    <i class="fa-solid fa-utensils text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg sm:text-xl leading-tight bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-300 bg-clip-text text-transparent">SLC Food Squad</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Utah Eats & Group Meetup Planner (Under $30/Plate)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Under $30 Budget Badge -->
+                <span class="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+                    <i class="fa-solid fa-piggy-bank"></i> Max $30 / Plate
+                </span>
+
+                <!-- Add Custom Restaurant Button -->
+                <button id="openAddModalBtn" class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all rounded-lg shadow-sm">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span class="hidden sm:inline">Add Place</span>
+                </button>
+
+                <!-- Reset Votes Button -->
+                <button id="resetVotesBtn" title="Reset all votes" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+
+        <!-- Top Group Winner Spotlight Banner -->
+        <section id="winnerBanner" class="mb-8 hidden">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-amber-600 text-white p-6 sm:p-8 shadow-xl shadow-orange-500/10">
+                <div class="absolute -right-6 -bottom-6 opacity-10 text-9xl font-black pointer-events-none">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold tracking-wide uppercase text-white">
+                            <i class="fa-solid fa-crown text-amber-200"></i> Top Group Pick for Next Meetup
+                        </div>
+                        <h2 id="winnerName" class="text-2xl sm:text-3xl font-extrabold text-white"></h2>
+                        <div class="flex flex-wrap items-center gap-3 text-sm text-amber-100">
+                            <span id="winnerRating" class="flex items-center gap-1 bg-white/10 px-2.5 py-0.5 rounded-md font-bold"></span>
+                            <span id="winnerPrice" class="font-bold"></span>
+                            <span id="winnerPriceRange" class="text-xs bg-black/20 px-2 py-0.5 rounded"></span>
+                            <span>•</span>
+                            <span id="winnerAddress" class="truncate max-w-xs sm:max-w-md"></span>
+                        </div>
+                        <p id="winnerNote" class="text-sm italic text-amber-50 bg-black/10 p-2.5 rounded-lg border border-white/10 mt-2 max-w-2xl"></p>
+                    </div>
+                    <div class="flex items-center gap-3 sm:flex-col sm:items-end justify-between border-t sm:border-t-0 border-white/20 pt-3 sm:pt-0">
+                        <div class="text-center sm:text-right">
+                            <span id="winnerVotesCount" class="text-3xl sm:text-4xl font-black">0</span>
+                            <span class="text-xs uppercase block text-amber-200 font-medium">Group Votes</span>
+                        </div>
+                        <a id="winnerMapBtn" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-orange-600 hover:bg-amber-50 rounded-xl font-bold text-sm shadow-md transition-all hover:scale-105 active:scale-95">
+                            <i class="fa-solid fa-location-dot"></i> Get Directions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 dark:border-slate-700/80 mb-6 space-y-4">
+            <div class="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+                <!-- Search Input -->
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchInput" placeholder="Search by name, dish, or location (e.g. tacos, pastrami, ramen, breakfast)..." class="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-900 border-0 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 outline-none transition">
+                </div>
+
+                <!-- Sort By Control -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold uppercase text-slate-400 tracking-wider mr-1">Sort:</span>
+                    <button id="sortRatingBtn" class="sort-btn active px-3.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-orange-500 text-white shadow-sm transition">
+                        <i class="fa-solid fa-star text-amber-300 mr-1"></i> Google Rating
+                    </button>
+                    <button id="sortVotesBtn" class="sort-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                        <i class="fa-solid fa-thumbs-up mr-1 text-orange-500"></i> Votes
+                    </button>
+                    <button id="sortNameBtn" class="sort-btn px-3.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                        <i class="fa-solid fa-arrow-down-a-z mr-1"></i> Name
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-700/60 text-xs">
+                <!-- Price Tier Filters -->
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="font-semibold text-slate-400 mr-1">Price Tier:</span>
+                    <button data-price="ALL" class="price-btn active px-2.5 py-1 rounded-md bg-orange-500 text-white font-medium transition">All (&lt;$30)</button>
+                    <button data-price="$" class="price-btn px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium transition">$ (&lt;$12)</button>
+                    <button data-price="$$" class="price-btn px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium transition">$$ ($12-$20)</button>
+                    <button data-price="$$$" class="price-btn px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium transition">$$$ ($20-$30)</button>
+                </div>
+
+                <!-- Visited Status Filter -->
+                <div class="flex items-center gap-2">
+                    <span class="font-semibold text-slate-400">Filter Visited:</span>
+                    <select id="triedFilterSelect" class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg px-2.5 py-1 border-0 focus:ring-1 focus:ring-orange-500 outline-none">
+                        <option value="ALL">Show All</option>
+                        <option value="NOT_TRIED">Untried Only</option>
+                        <option value="TRIED">Already Visited</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Count Indicator -->
+        <div class="flex items-center justify-between mb-4 px-1">
+            <span id="placesCountLabel" class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                Showing 0 places
+            </span>
+            <div class="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Visited</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block"></span> Untried</span>
+            </div>
+        </div>
+
+        <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Dynamic JavaScript Content Will Render Here -->
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="emptyState" class="hidden text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 my-4">
+            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center text-2xl">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-700 dark:text-slate-200">No restaurants match your filters</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Try resetting your search query or price selection.</p>
+        </div>
+
+    </main>
+
+    <div id="addModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden transition-opacity duration-200">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 relative">
+            <button id="closeAddModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-8 h-8 rounded-lg bg-orange-500 text-white flex items-center justify-center text-sm font-bold">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Add New Food Spot</h3>
+                    <p class="text-xs text-slate-500">Must be under $30 per plate</p>
+                </div>
+            </div>
+
+            <form id="addRestaurantForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Restaurant Name *</label>
+                    <input type="text" id="addName" required placeholder="e.g. Santo Taco" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border-0 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Google Rating (1-5) *</label>
+                        <input type="number" id="addRating" min="1" max="5" step="0.1" required placeholder="4.7" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border-0 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Price Tier *</label>
+                        <select id="addPrice" required class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border-0 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                            <option value="$">$ (&lt;$12)</option>
+                            <option value="$$" selected>$$ ($12 - $20)</option>
+                            <option value="$$$">$$$ ($20 - $30)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Estimated Cost Range</label>
+                    <input type="text" id="addPriceRange" placeholder="e.g. $10 - $18 / plate" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border-0 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Address *</label>
+                    <input type="text" id="addAddress" required placeholder="123 Main St, Salt Lake City" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border-0 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Highlight / Dish Recommendation</label>
+                    <textarea id="addNote" rows="2" placeholder="e.g. Best al pastor tacos and salsa bar in town!" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border-0 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none resize-none"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" id="cancelAddBtn" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-md transition">Save Place</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Expanded list of top-rated Utah restaurants strictly under $30/plate
+        const DEFAULT_RESTAURANTS = [
+            {
+                id: '1',
+                name: "Mumbai House",
+                rating: 4.9,
+                price: "$$",
+                priceRange: "$16–$24/plate",
+                address: "2730 S State St, Salt Lake City",
+                note: "#1 highest Google-rated spot in Utah (13k+ reviews). Insanely flavorful Chicken Tikka Masala, Lamb Curry & Garlic Naan.",
+                tier: "Moderate"
+            },
+            {
+                id: '2',
+                name: "Grove Market and Deli",
+                rating: 4.8,
+                price: "$",
+                priceRange: "$10–$16/plate",
+                address: "1906 S Main St, Salt Lake City",
+                note: "Legendary Utah staple known for 'The Big One' - multi-pound giant subs piled sky-high with deli meats.",
+                tier: "Cheap"
+            },
+            {
+                id: '3',
+                name: "Feldman's Deli",
+                rating: 4.7,
+                price: "$$",
+                priceRange: "$15–$22/plate",
+                address: "2005 E 2700 S, Salt Lake City",
+                note: "Authentic East Coast deli. Massive half-pound pastrami on rye & corned beef sandwiches.",
+                tier: "Moderate"
+            },
+            {
+                id: '4',
+                name: "Caputo's Market & Deli",
+                rating: 4.7,
+                price: "$",
+                priceRange: "$12–$18/plate",
+                address: "314 W 300 S, Salt Lake City",
+                note: "Iconic Italian market serving incredible subs, muffalettas, prosciuttos & artisan cheeses.",
+                tier: "Cheap"
+            },
+            {
+                id: '5',
+                name: "The Park Café",
+                rating: 4.7,
+                price: "$",
+                priceRange: "$10–$16/plate",
+                address: "604 E 1300 S, Salt Lake City",
+                note: "Buzzy park-view cafe across Liberty Park. Legendary French toast, pork chili verde omelets, and hash browns.",
+                tier: "Cheap"
+            },
+            {
+                id: '6',
+                name: "Spitz Mediterranean Street Food",
+                rating: 4.7,
+                price: "$",
+                priceRange: "$12–$18/plate",
+                address: "35 E Broadway, Salt Lake City",
+                note: "Bustling downtown spot famous for doner wraps, street cart fries with aioli & feta, and sangria.",
+                tier: "Cheap"
+            },
+            {
+                id: '7',
+                name: "Facil Taqueria",
+                rating: 4.7,
+                price: "$$",
+                priceRange: "$12–$20/plate",
+                address: "4429 S 2950 E, Holladay/Millcreek",
+                note: "Mind blowingly good for the price! Local mushroom & salmon tacos just slap.",
+                tier: "Moderate"
+            },
+            {
+                id: '8',
+                name: "Tosh's Ramen",
+                rating: 4.7,
+                price: "$$",
+                priceRange: "$14–$18/plate",
+                address: "1465 S State St, Salt Lake City",
+                note: "Combo ramen hits the spot with rich black shoyu broth.",
+                tier: "Moderate"
+            },
+            {
+                id: '9',
+                name: "Bricks Corner",
+                rating: 4.7,
+                price: "$$",
+                priceRange: "$16–$26/pie",
+                address: "1465 S 700 E, Salt Lake City",
+                note: "Renowned Detroit-style deep-dish pizza with caramelized cheesy crust edges.",
+                tier: "Moderate"
+            },
+            {
+                id: '10',
+                name: "Chile-Tepin",
+                rating: 4.6,
+                price: "$$",
+                priceRange: "$15–$25/plate",
+                address: "215 S 400 W, Salt Lake City",
+                note: "Downtown Mexican favorite for sizzling fajitas, molcajete bowls, and chimichangas.",
+                tier: "Moderate"
+            },
+            {
+                id: '11',
+                name: "The Copper Onion",
+                rating: 4.6,
+                price: "$$$",
+                priceRange: "$18–$29/plate",
+                address: "111 E 300 S, Salt Lake City",
+                note: "Famous Copper Onion burger, beef stroganoff, and ricottini. Top downtown dinner under $30.",
+                tier: "Upper Moderate"
+            },
+            {
+                id: '12',
+                name: "Pretty Bird Hot Chicken",
+                rating: 4.6,
+                price: "$$",
+                priceRange: "$14–$18/plate",
+                address: "146 Regent St, Salt Lake City",
+                note: "Jumbo fried hot chicken sandwiches with slaw and special sauce.",
+                tier: "Moderate"
+            },
+            {
+                id: '13',
+                name: "Lucky 13",
+                rating: 4.6,
+                price: "$",
+                priceRange: "$12–$18/plate",
+                address: "135 W 1300 S, Salt Lake City",
+                note: "Award-winning craft burgers (Ring of Fire, Breath Minter) & fresh cut fries.",
+                tier: "Cheap"
+            },
+            {
+                id: '14',
+                name: "Red Iguana",
+                rating: 4.6,
+                price: "$$",
+                priceRange: "$14–$22/plate",
+                address: "736 W North Temple, Salt Lake City",
+                note: "Iconic Salt Lake institution famous for 7+ legendary mole sauce varieties.",
+                tier: "Moderate"
+            },
+            {
+                id: '15',
+                name: "Gordo's Tacos & Beer",
+                rating: 4.6,
+                price: "$",
+                priceRange: "$10–$16/plate",
+                address: "5470 S 900 E, Murray",
+                note: "Famous for crispy, juicy quesobirria tacos served with rich consommé.",
+                tier: "Cheap"
+            },
+            {
+                id: '16',
+                name: "Gaetano's Sub Shop",
+                rating: 4.6,
+                price: "$",
+                priceRange: "$10–$15/plate",
+                address: "216 E 3300 S, Salt Lake City",
+                note: "Top spot for Philly Cheesesteak or Italian meats (way better than Moochies!).",
+                tier: "Cheap"
+            },
+            {
+                id: '17',
+                name: "Slackwater Pizza",
+                rating: 4.6,
+                price: "$$",
+                priceRange: "$14–$22/pie",
+                address: "1025 S 500 W, Salt Lake City",
+                note: "Creative artisanal pizzas (like Tikka Masala Pizza) & massive beer selection.",
+                tier: "Moderate"
+            },
+            {
+                id: '18',
+                name: "Crown Burgers",
+                rating: 4.6,
+                price: "$",
+                priceRange: "$8–$14/plate",
+                address: "377 E 200 S, Salt Lake City",
+                note: "Classic Utah tradition - famous pastrami-topped crown burger with fry sauce.",
+                tier: "Cheap"
+            },
+            {
+                id: '19',
+                name: "Lone Star Taqueria",
+                rating: 4.5,
+                price: "$",
+                priceRange: "$10–$16/plate",
+                address: "2265 Fort Union Blvd, Cottonwood Heights",
+                note: "Funky local staple serving signature crispy fish tacos, burritos, and ice-cold beer.",
+                tier: "Cheap"
+            },
+            {
+                id: '20',
+                name: "Bruges Belgian Bistro",
+                rating: 4.5,
+                price: "$",
+                priceRange: "$10–$16/plate",
+                address: "336 W 300 S, Salt Lake City",
+                note: "Famous for the Machine Gun sandwich (lamb sausage on baguette with fries) & Authentic Liege Waffles.",
+                tier: "Cheap"
+            },
+            {
+                id: '21',
+                name: "Mazza Middle Eastern",
+                rating: 4.5,
+                price: "$$",
+                priceRange: "$14–$22/plate",
+                address: "1515 S 1500 E, Salt Lake City",
+                note: "Outstanding Middle Eastern falafel, lamb shawarma, dip platters, and Lebanese wines.",
+                tier: "Moderate"
+            },
+            {
+                id: '22',
+                name: "El Paisa Grill",
+                rating: 4.5,
+                price: "$$",
+                priceRange: "$15–$25/plate",
+                address: "2126 S 3200 W, West Valley City",
+                note: "Go here for the massive Molcajete Supreme sizzling hot stone bowl.",
+                tier: "Moderate"
+            },
+            {
+                id: '23',
+                name: "Pizza Nono",
+                rating: 4.5,
+                price: "$$",
+                priceRange: "$14–$18/pie",
+                address: "925 Harvey Milk Blvd, Salt Lake City",
+                note: "Consistently top-notch wood-fired sourdough personal pizzas in 9th & 9th.",
+                tier: "Moderate"
+            },
+            {
+                id: '24',
+                name: "Oh Mai Sandwich Kitchen",
+                rating: 4.5,
+                price: "$",
+                priceRange: "$8–$14/plate",
+                address: "3425 S State St, Salt Lake City",
+                note: "Quick, cheap, and insanely fresh Vietnamese banh mi sandwiches & pho.",
+                tier: "Cheap"
+            },
+            {
+                id: '25',
+                name: "Ruth's Diner",
+                rating: 4.5,
+                price: "$$",
+                priceRange: "$12–$24/plate",
+                address: "4160 Emigration Canyon Rd, Salt Lake City",
+                note: "Historic 1930s canyon diner famous for mile-high biscuits and scenic patio dining.",
+                tier: "Moderate"
+            },
+            {
+                id: '26',
+                name: "Tacos Lopez",
+                rating: 4.5,
+                price: "$",
+                priceRange: "$6–$12/plate",
+                address: "7903 S SMM Rd, West Jordan",
+                note: "Highly recommended for authentic crispy vampiros tacos.",
+                tier: "Cheap"
+            },
+            {
+                id: '27',
+                name: "Desert Edge Brewery",
+                rating: 4.4,
+                price: "$$",
+                priceRange: "$14–$22/plate",
+                address: "273 S Trolley Sq, Salt Lake City",
+                note: "Great French onion soup, poblano chicken, and pasta salad in Trolley Square.",
+                tier: "Moderate"
+            },
+            {
+                id: '28',
+                name: "Penny Ann's Cafe",
+                rating: 4.4,
+                price: "$",
+                priceRange: "$10–$15/plate",
+                address: "1810 S Main St, Salt Lake City",
+                note: "Home of the Heavenly Hotcakes! Famous sour cream pancakes and classic diner fare.",
+                tier: "Cheap"
+            },
+            {
+                id: '29',
+                name: "Rancheritos Mexican Food",
+                rating: 4.2,
+                price: "$",
+                priceRange: "$8–$13/plate",
+                address: "3425 S 2200 W, Salt Lake City",
+                note: "24/7 staple for giant breakfast burritos anytime.",
+                tier: "Cheap"
+            }
+        ];
+
+        let restaurants = [];
+        let userVotes = {};
+        let triedPlaces = {};
+        let activeSort = 'RATING';
+        let selectedPrice = 'ALL';
+        let searchQuery = '';
+        let triedFilter = 'ALL';
+
+        const STORAGE_PLACES_KEY = 'slc_food_places_v3';
+        const STORAGE_VOTES_KEY = 'slc_food_votes_v3';
+        const STORAGE_TRIED_KEY = 'slc_food_tried_v3';
+
+        function initData() {
+            const savedPlaces = localStorage.getItem(STORAGE_PLACES_KEY);
+            if (savedPlaces) {
+                try {
+                    restaurants = JSON.parse(savedPlaces);
+                } catch (e) {
+                    restaurants = [...DEFAULT_RESTAURANTS];
+                }
+            } else {
+                restaurants = [...DEFAULT_RESTAURANTS];
+            }
+
+            const savedVotes = localStorage.getItem(STORAGE_VOTES_KEY);
+            if (savedVotes) {
+                try { userVotes = JSON.parse(savedVotes); } catch(e) { userVotes = {}; }
+            }
+
+            const savedTried = localStorage.getItem(STORAGE_TRIED_KEY);
+            if (savedTried) {
+                try { triedPlaces = JSON.parse(savedTried); } catch(e) { triedPlaces = {}; }
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_PLACES_KEY, JSON.stringify(restaurants));
+            localStorage.setItem(STORAGE_VOTES_KEY, JSON.stringify(userVotes));
+            localStorage.setItem(STORAGE_TRIED_KEY, JSON.stringify(triedPlaces));
+        }
+
+        function initTheme() {
+            const isDark = localStorage.getItem('theme') === 'dark' || 
+                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').className = 'fa-solid fa-sun text-amber-400';
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').className = 'fa-solid fa-moon';
+            }
+        }
+
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon';
+        });
+
+        function getFilteredAndSortedRestaurants() {
+            let list = [...restaurants];
+
+            if (searchQuery.trim() !== '') {
+                const q = searchQuery.toLowerCase();
+                list = list.filter(r => 
+                    r.name.toLowerCase().includes(q) || 
+                    r.address.toLowerCase().includes(q) || 
+                    (r.note && r.note.toLowerCase().includes(q))
+                );
+            }
+
+            if (selectedPrice !== 'ALL') {
+                list = list.filter(r => r.price === selectedPrice);
+            }
+
+            if (triedFilter === 'TRIED') {
+                list = list.filter(r => !!triedPlaces[r.id]);
+            } else if (triedFilter === 'NOT_TRIED') {
+                list = list.filter(r => !triedPlaces[r.id]);
+            }
+
+            list.sort((a, b) => {
+                if (activeSort === 'RATING') {
+                    return b.rating - a.rating;
+                } else if (activeSort === 'VOTES') {
+                    const votesA = userVotes[a.id] || 0;
+                    const votesB = userVotes[b.id] || 0;
+                    if (votesB !== votesA) return votesB - votesA;
+                    return b.rating - a.rating;
+                } else if (activeSort === 'NAME') {
+                    return a.name.localeCompare(b.name);
+                }
+                return 0;
+            });
+
+            return list;
+        }
+
+        function updateWinnerSpotlight() {
+            let topSpot = null;
+            let maxVotes = 0;
+
+            restaurants.forEach(r => {
+                const v = userVotes[r.id] || 0;
+                if (v > maxVotes) {
+                    maxVotes = v;
+                    topSpot = r;
+                }
+            });
+
+            const winnerBanner = document.getElementById('winnerBanner');
+            if (topSpot && maxVotes > 0) {
+                const winnerGoogleUrl = `https://www.google.com/search?q=${encodeURIComponent(topSpot.name + ' ' + topSpot.address)}`;
+                document.getElementById('winnerName').innerHTML = `<a href="${winnerGoogleUrl}" target="_blank" rel="noopener noreferrer" class="hover:underline inline-flex items-center gap-2 text-white">${topSpot.name} <i class="fa-solid fa-arrow-up-right-from-square text-base opacity-75"></i></a>`;
+                document.getElementById('winnerRating').innerHTML = `<i class="fa-solid fa-star text-amber-300"></i> ${topSpot.rating.toFixed(1)}`;
+                document.getElementById('winnerPrice').textContent = topSpot.price;
+                document.getElementById('winnerPriceRange').textContent = topSpot.priceRange || "Under $30";
+                document.getElementById('winnerAddress').textContent = topSpot.address;
+                document.getElementById('winnerNote').textContent = topSpot.note || "Top voted group selection!";
+                document.getElementById('winnerVotesCount').textContent = maxVotes;
+                document.getElementById('winnerMapBtn').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(topSpot.name + ' ' + topSpot.address)}`;
+                
+                winnerBanner.classList.remove('hidden');
+            } else {
+                winnerBanner.classList.add('hidden');
+            }
+        }
+
+        function renderGrid() {
+            const filtered = getFilteredAndSortedRestaurants();
+            const cardsGrid = document.getElementById('cardsGrid');
+            const emptyState = document.getElementById('emptyState');
+            const countLabel = document.getElementById('placesCountLabel');
+
+            countLabel.textContent = `Showing ${filtered.length} of ${restaurants.length} places (under $30/plate)`;
+
+            if (filtered.length === 0) {
+                cardsGrid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            cardsGrid.innerHTML = filtered.map(item => {
+                const isVisited = !!triedPlaces[item.id];
+                const votes = userVotes[item.id] || 0;
+                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' ' + item.address)}`;
+                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.name + ' ' + item.address)}`;
+
+                let tierBadgeClass = "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800";
+                if (item.price === '$') {
+                    tierBadgeClass = "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800";
+                } else if (item.price === '$$$') {
+                    tierBadgeClass = "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800";
+                }
+
+                return `
+                    <div class="glass-card rounded-2xl p-5 border transition-all duration-200 flex flex-col justify-between relative shadow-sm hover:shadow-md ${isVisited ? 'border-emerald-300/80 dark:border-emerald-700/80 bg-emerald-50/20 dark:bg-emerald-950/10' : 'border-slate-200/80 dark:border-slate-800'}">
+                        
+                        <div>
+                            <!-- Header Row -->
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-900 dark:text-slate-100 leading-snug flex items-center gap-2">
+                                        <a href="${googleSearchUrl}" target="_blank" rel="noopener noreferrer" class="hover:text-orange-600 dark:hover:text-orange-400 hover:underline transition-colors inline-flex items-center gap-1.5" title="View on Google">
+                                            ${item.name}
+                                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 opacity-70 group-hover:opacity-100"></i>
+                                        </a>
+                                    </h3>
+                                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                                        <!-- Rating Badge -->
+                                        <span class="inline-flex items-center gap-1 text-xs font-extrabold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">
+                                            <i class="fa-solid fa-star text-amber-500"></i> ${item.rating.toFixed(1)}
+                                        </span>
+                                        <!-- Price Tag -->
+                                        <span class="text-xs font-bold ${tierBadgeClass} px-2 py-0.5 rounded-md">
+                                            ${item.price}
+                                        </span>
+                                        ${item.priceRange ? `<span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">(${item.priceRange})</span>` : ''}
+                                    </div>
+                                </div>
+
+                                <!-- Visited Toggle Button -->
+                                <button onclick="toggleTried('${item.id}')" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${isVisited ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}" title="Mark as visited">
+                                    <i class="fa-solid ${isVisited ? 'fa-circle-check' : 'fa-circle'}"></i>
+                                    <span>${isVisited ? 'Visited' : 'Untried'}</span>
+                                </button>
+                            </div>
+
+                            <!-- Address Link -->
+                            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="group flex items-start gap-1.5 text-xs text-slate-500 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400 mt-2 mb-3 transition-colors">
+                                <i class="fa-solid fa-location-dot text-slate-400 group-hover:text-orange-500 mt-0.5"></i>
+                                <span class="underline-offset-2 group-hover:underline line-clamp-1">${item.address}</span>
+                            </a>
+
+                            <!-- Highlight Note -->
+                            ${item.note ? `
+                                <div class="bg-slate-100/80 dark:bg-slate-900/60 rounded-xl p-3 text-xs text-slate-600 dark:text-slate-300 italic mb-4 border border-slate-200/50 dark:border-slate-800">
+                                    <i class="fa-solid fa-quote-left text-orange-400/60 mr-1"></i>
+                                    ${item.note}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Footer Voting -->
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                            <span class="text-xs font-semibold text-slate-400">
+                                Group Vote
+                            </span>
+
+                            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200/60 dark:border-slate-800">
+                                <button onclick="changeVote('${item.id}', -1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition-all text-xs active:scale-95">
+                                    <i class="fa-solid fa-minus"></i>
+                                </button>
+                                <span class="px-2 font-bold text-sm ${votes > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}">
+                                    ${votes}
+                                </span>
+                                <button onclick="changeVote('${item.id}', 1)" class="w-7 h-7 rounded-lg bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center transition-all text-xs active:scale-95 shadow-sm">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+            }).join('');
+
+            updateWinnerSpotlight();
+        }
+
+        window.toggleTried = function(id) {
+            triedPlaces[id] = !triedPlaces[id];
+            saveData();
+            renderGrid();
+        };
+
+        window.changeVote = function(id, delta) {
+            const current = userVotes[id] || 0;
+            const updated = Math.max(0, current + delta);
+            userVotes[id] = updated;
+            saveData();
+            renderGrid();
+        };
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderGrid();
+        });
+
+        document.getElementById('triedFilterSelect').addEventListener('change', (e) => {
+            triedFilter = e.target.value;
+            renderGrid();
+        });
+
+        document.querySelectorAll('.price-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.price-btn').forEach(b => {
+                    b.classList.remove('bg-orange-500', 'text-white', 'active');
+                    b.classList.add('bg-slate-100', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-400');
+                });
+                btn.classList.add('bg-orange-500', 'text-white', 'active');
+                btn.classList.remove('bg-slate-100', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-400');
+                
+                selectedPrice = btn.dataset.price;
+                renderGrid();
+            });
+        });
+
+        const sortButtons = {
+            'RATING': document.getElementById('sortRatingBtn'),
+            'VOTES': document.getElementById('sortVotesBtn'),
+            'NAME': document.getElementById('sortNameBtn')
+        };
+
+        Object.keys(sortButtons).forEach(sortType => {
+            sortButtons[sortType].addEventListener('click', () => {
+                Object.values(sortButtons).forEach(b => {
+                    b.classList.remove('bg-orange-500', 'text-white');
+                    b.classList.add('bg-slate-100', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-300');
+                });
+                sortButtons[sortType].classList.add('bg-orange-500', 'text-white');
+                sortButtons[sortType].classList.remove('bg-slate-100', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-300');
+
+                activeSort = sortType;
+                renderGrid();
+            });
+        });
+
+        document.getElementById('resetVotesBtn').addEventListener('click', () => {
+            if (Object.keys(userVotes).length === 0) return;
+            userVotes = {};
+            saveData();
+            renderGrid();
+        });
+
+        const addModal = document.getElementById('addModal');
+        const openModalBtn = document.getElementById('openAddModalBtn');
+        const closeModalBtn = document.getElementById('closeAddModalBtn');
+        const cancelAddBtn = document.getElementById('cancelAddBtn');
+        const addForm = document.getElementById('addRestaurantForm');
+
+        function openModal() { addModal.classList.remove('hidden'); }
+        function closeModal() { addModal.classList.add('hidden'); addForm.reset(); }
+
+        openModalBtn.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelAddBtn.addEventListener('click', closeModal);
+
+        addForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('addName').value.trim();
+            const rating = parseFloat(document.getElementById('addRating').value);
+            const price = document.getElementById('addPrice').value;
+            const priceRange = document.getElementById('addPriceRange').value.trim() || (price === '$' ? '<$12/plate' : price === '$$' ? '$12-$20/plate' : '$20-$30/plate');
+            const address = document.getElementById('addAddress').value.trim();
+            const note = document.getElementById('addNote').value.trim();
+
+            if (!name || isNaN(rating) || !address) return;
+
+            const newRestaurant = {
+                id: Date.now().toString(),
+                name,
+                rating,
+                price,
+                priceRange,
+                address,
+                note,
+                tier: price === '$' ? 'Cheap' : price === '$$' ? 'Moderate' : 'Upper Moderate'
+            };
+
+            restaurants.unshift(newRestaurant);
+            saveData();
+            renderGrid();
+            closeModal();
+        });
+
+        window.onload = function() {
+            initTheme();
+            initData();
+            renderGrid();
+        };
+    </script>
+</body>
+</html>
